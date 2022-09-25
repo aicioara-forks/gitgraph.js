@@ -101,7 +101,7 @@ class BranchUserApi<TNode> {
     }
 
     // Deal with shorter syntax
-    if (typeof options === "string") options = { subject: "foo" };
+    if (typeof options === "string") options = { subject: options };
     if (!options) options = {};
 
     this._commitWithParents(options, []);
