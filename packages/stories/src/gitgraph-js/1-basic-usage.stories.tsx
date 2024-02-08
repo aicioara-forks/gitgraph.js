@@ -245,6 +245,23 @@ storiesOf("gitgraph-js/1. Basic usage", module)
       }}
     </GraphContainer>
   ))
+  .add("two branches", () => (
+    <GraphContainer>
+      {(graphContainer) => {
+        const gitgraph = createGitgraph(graphContainer, {
+          generateCommitHash: createFixedHashGenerator(),
+        });
+
+        const master = gitgraph.branch({
+          name: "master",
+        });
+
+        master.commit().commit().tag("a").tag("b").commit();
+        gitgraph.branch("develop");
+        gitgraph.branch("main");
+      }}
+    </GraphContainer>
+  ))
   .add("branch label on every commit", () => (
     <GraphContainer>
       {(graphContainer) => {

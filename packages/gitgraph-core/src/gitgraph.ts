@@ -208,7 +208,9 @@ class GitgraphCore<TNode = SVGElement> {
 
     const branch = new Branch<TNode>(options);
     this.branches.set(branch.name, branch);
-
+    if (options.parentCommitHash != null) {
+      this.refs.set(branch.name, options.parentCommitHash);
+    }
     return branch;
   }
 

@@ -76,7 +76,11 @@ class BranchUserApi<TNode> {
 
     options.from = this;
 
-    return this._graph.createBranch(options).getUserApi();
+    const branch = this._graph.createBranch(options);
+    this._commitWithParents(options, []);
+    this._onGraphUpdate();
+
+    return branch.getUserApi();
   }
 
   /**
@@ -308,14 +312,14 @@ class BranchUserApi<TNode> {
       style: this._getCommitStyle(options.style),
     });
 
-    if (parentOnSameBranch) {
-      // Take all the refs from the parent
-      const parentRefs = this._graph.refs.getNames(parentOnSameBranch);
-      parentRefs.forEach((ref) => this._graph.refs.set(ref, commit.hash));
-    } else {
-      // Set the branch ref
-      this._graph.refs.set(this._branch.name, commit.hash);
-    }
+    // if (parentOnSameBranch) {
+    //   // Take all the refs from the parent
+    //   const parentRefs = this._graph.refs.getNames(parentOnSameBranch);
+    //   parentRefs.forEach((ref) => this._graph.refs.set(ref, commit.hash));
+    // } else {
+    //   // Set the branch ref
+    // }
+    this._graph.refs.set(this._branch.name, commit.hash);
 
     // Add the new commit
     this._graph.commits.push(commit);

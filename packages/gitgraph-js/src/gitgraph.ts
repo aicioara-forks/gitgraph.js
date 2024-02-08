@@ -68,6 +68,7 @@ function createGitgraph(
   let commitsElements: {
     [commitHash: string]: {
       branchLabel: SVGGElement | null;
+      branchLabels: SVGGraphicsElement[] | null;
       tags: SVGGElement[];
       message: SVGGElement | null;
     };
@@ -195,21 +196,24 @@ function createGitgraph(
       // Ensure commits elements (branch labels, message…) are well positionned.
       // It can't be done at render time since elements size is dynamic.
       Object.keys(commitsElements).forEach((commitHash) => {
-        const { branchLabel, tags, message } = commitsElements[commitHash];
+        const { branchLabels, tags, message } = commitsElements[commitHash];
 
         // We'll store X position progressively and translate elements.
         let x = commitMessagesX;
 
-        if (branchLabel) {
+        branchLabels.forEach((branchLabel) => {
           moveElement(branchLabel, x);
 
-          // BBox width misses box padding
-          // => they are set later, on branch label update.
-          // We would need to make branch label update happen before to solve it.
-          const branchLabelWidth =
-            branchLabel.getBBox().width + 2 * BRANCH_LABEL_PADDING_X;
-          x += branchLabelWidth + padding;
-        }
+          // BBox width misses box padding and offset
+          // => they are set later, on branchLabel update.
+          // We would need to make branchLabel update happen before to solve it.
+          const offset = parseFloat(
+            branchLabel.getAttribute("data-offset") || "0",
+          );
+          const tagWidth =
+            branchLabel.getBBox().width + 2 * TAG_PADDING_X + offset;
+          x += tagWidth + padding;
+        });
 
         tags.forEach((tag) => {
           moveElement(tag, x);
@@ -440,12 +444,16 @@ function createGitgraph(
 
       if (!gitgraph.branchLabelOnEveryCommit) {
         const commitHash = gitgraph.refs.getCommit(branch.name);
-        if (commit.hash !== commitHash) return null;
+        if (branch.name == "develop") {
+        }
+        if (commit.hash !== commitHash) {
+          return null;
+        }
       }
 
       // For the moment, we don't handle multiple branch labels.
       // To do so, we'd need to reposition each of them appropriately.
-      if (commit.branchToDisplay !== branch.name) return null;
+      // if (commit.branchToDisplay !== branch.name) return null;
 
       const branchLabel = branch.renderLabel
         ? branch.renderLabel(branch)
@@ -592,6 +600,7 @@ function createGitgraph(
     }
 
     commitsElements[commit.hashAbbrev].branchLabel = branchLabels;
+    commitsElements[commit.hashAbbrev].branchLabels.push(branchLabels);
   }
 
   function setMessageRef(commit: Commit, message: SVGGElement | null): void {
@@ -613,6 +622,7 @@ function createGitgraph(
   function initCommitElements(commit: Commit): void {
     commitsElements[commit.hashAbbrev] = {
       branchLabel: null,
+      branchLabels: [],
       tags: [],
       message: null,
     };
